@@ -5,8 +5,12 @@ export default [
     adminOnly: true,
     botAdmin: true,
     async execute({ sock, remoteJid, reply }) {
-      await sock.groupRevokeInvite(remoteJid);
-      await reply("♻️ Link de invitación revocado.");
+      try {
+        await sock.groupRevokeInvite(remoteJid);
+        await reply("♻️ Link de invitación revocado.");
+      } catch {
+        await reply("❌ No se pudo revocar el link.");
+      }
     },
   },
 ];
