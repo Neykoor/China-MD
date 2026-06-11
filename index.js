@@ -1,9 +1,15 @@
-import { makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } from "@whiskeysockets/baileys";
+import makeWASocket, {
+  useMultiFileAuthState,
+  fetchLatestBaileysVersion,
+  UNAUTHORIZED_CODES,
+  Browsers,
+} from "@itsliaaa/baileys";
 import { pluginLid } from "lidsync";
 import pino from "pino";
 import qrcode from "qrcode-terminal";
 import { loadPlugins } from "./src/loader.js";
 import { createHandler } from "./src/handler.js";
+import { registerWelcome } from "./src/welcome.js";
 
 const logger = pino({ level: "silent" });
 
@@ -11,18 +17,20 @@ async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState("./auth");
   const { version } = await fetchLatestBaileysVersion();
 
-  let sock = makeWASocket({
+  const sock = makeWASocket({
     version,
     auth: state,
     logger,
+    browser: Browsers.macOS("Chrome"),
     printQRInTerminal: false,
-    browser: ["LidSync Bot", "Chrome", "1.0.0"],
   });
 
   pluginLid(sock);
 
   const plugins = await loadPlugins();
   const handler = createHandler(sock, plugins);
+
+  registerWelcome(sock);
 
   sock.ev.on("creds.update", saveCreds);
 
@@ -34,9 +42,9 @@ async function startBot() {
     }
 
     if (connection === "close") {
-      const code = lastDisconnect?.error?.output?.statusCode;
-      const shouldReconnect = code !== DisconnectReason.loggedOut;
-      console.log(`[Bot] Conexión cerrada (${code}). Reconectar: ${shouldReconnect}`);
+      const statusCode = lastDisconnect?.error?.output?.statusCode;
+      const shouldReconnect = !UNAUTHORIZED_CODES.includes(statusCode);
+      console.log(`[Bot] Conexión cerrada (${statusCode}). Reconectar: ${shouldReconnect}`);
       if (shouldReconnect) startBot();
     }
 
