@@ -11,9 +11,13 @@ export async function loadPlugins() {
   const plugins = [];
 
   for (const file of files) {
-    const mod = await import(pathToFileURL(resolve(pluginsDir, file)).href);
-    if (mod.default && Array.isArray(mod.default)) {
-      plugins.push(...mod.default);
+    try {
+      const mod = await import(pathToFileURL(resolve(pluginsDir, file)).href);
+      if (mod.default && Array.isArray(mod.default)) {
+        plugins.push(...mod.default);
+      }
+    } catch (err) {
+      console.error(`[Loader] Error cargando plugin ${file}:`, err.message);
     }
   }
 
