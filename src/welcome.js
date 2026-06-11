@@ -9,10 +9,26 @@ export function registerWelcome(sock) {
       return;
     }
 
-    for (const participantRaw of participants) {
-      const resolved = await sock.lid.resolve(participantRaw).catch(() => null);
-      const jid = resolved || participantRaw;
-      const numero = jid.split("@")[0];
+    for (const p of participants) {
+      let numero = null;
+
+      const pn = p.phoneNumber || p.pn;
+      if (pn) {
+        numero = pn.replace(/\D/g, "");
+      }
+
+      if (!numero && p.lid) {
+        const resolved = await sock.lid.resolve(p.lid).catch(() => null);
+        if (resolved) numero = resolved.split("@")[0];
+      }
+
+      if (!numero && typeof p === "string") {
+        const resolved = await sock.lid.resolve(p).catch(() => null);
+        const jid = resolved || p;
+        numero = jid.split("@")[0];
+      }
+
+      if (!numero) continue;
 
       const texto =
         `👋 Bienvenido/a al grupo *${groupMeta.subject}*\n` +
