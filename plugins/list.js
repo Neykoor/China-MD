@@ -10,9 +10,17 @@ export default [
         return reply("❌ No se pudo obtener la lista.");
       }
 
-      const lines = groupMeta.participants.map((p, i) => {
+      const participants = groupMeta.participants;
+
+      const resolvedMap = await sock.lid
+        .resolveParticipants(participants)
+        .catch(() => new Map());
+
+      const lines = participants.map((p, i) => {
         const tag = p.admin === "superadmin" ? "👑" : p.admin === "admin" ? "🛡️" : "👤";
-        return `${tag} ${i + 1}. ${p.id.split("@")[0]}`;
+        const jid = resolvedMap.get(p.id) || p.id;
+        const numero = jid.split("@")[0];
+        return `${tag} ${i + 1}. ${numero}`;
       });
 
       await reply(`*Participantes (${lines.length}):*\n\n${lines.join("\n")}`);
