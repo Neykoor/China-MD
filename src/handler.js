@@ -8,8 +8,7 @@ export function createHandler(sock, plugins) {
       if (!msg.message || msg.key.fromMe) continue;
 
       const remoteJid = msg.key.remoteJid;
-      const isGroup = remoteJid?.endsWith("@g.us");
-      if (!isGroup) continue;
+      if (!remoteJid?.endsWith("@g.us")) continue;
 
       const body =
         msg.message?.conversation ||
@@ -20,8 +19,12 @@ export function createHandler(sock, plugins) {
 
       if (!body.startsWith("!")) continue;
 
-      const [rawCmd, ...args] = body.trim().slice(1).split(/\s+/);
+      const parts = body.trim().slice(1).split(/\s+/);
+      const rawCmd = parts[0];
+      if (!rawCmd) continue;
+
       const command = rawCmd.toLowerCase();
+      const args = parts.slice(1);
 
       const senderRaw = msg.key.participant || msg.key.remoteJid;
 
@@ -36,7 +39,6 @@ export function createHandler(sock, plugins) {
         remoteJid,
         senderRaw,
         args,
-        isGroup,
         isSenderAdmin,
         isBotAdmin,
         reply: (text) => sock.sendMessage(remoteJid, { text }, { quoted: msg }),
