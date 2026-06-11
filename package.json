@@ -1,5 +1,5 @@
 {
-  "name": "lidsync-bot",
+  "name": "China-MD",
   "version": "1.0.0",
   "description": "Bot de gestión de grupos WhatsApp — LidSync",
   "type": "module",
@@ -9,7 +9,7 @@
     "dev": "node --watch index.js"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "^6.7.18",
+    "@whiskeysockets/baileys": "github:this-xys/baileys",
     "lidsync": "^5.0.3",
     "pino": "^9.6.0",
     "qrcode-terminal": "^0.12.0"
