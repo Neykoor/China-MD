@@ -9,8 +9,9 @@
     "dev": "node --watch index.js"
   },
   "dependencies": {
-    "@itsliaaa/baileys": "^0.3.17",
+    "@itsliaaa/baileys": "github:itsliaaa/baileys",
     "lidsync": "^5.0.3",
+    "node-cache": "^5.1.2",
     "pino": "^9.6.0",
     "qrcode-terminal": "^0.12.0"
   },
