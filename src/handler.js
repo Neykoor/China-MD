@@ -25,7 +25,6 @@ export function createHandler(sock, plugins) {
 
       const command = rawCmd.toLowerCase();
       const args = parts.slice(1);
-
       const senderRaw = msg.key.participant || msg.key.remoteJid;
 
       const [isSenderAdmin, isBotAdmin] = await Promise.all([
