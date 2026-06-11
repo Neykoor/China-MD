@@ -1,3 +1,5 @@
+import { adminManager } from "./adminManager.js";
+
 export function createHandler(sock, plugins) {
   return async function handler({ messages, type }) {
     if (type !== "notify") return;
@@ -22,38 +24,27 @@ export function createHandler(sock, plugins) {
       const command = rawCmd.toLowerCase();
 
       const senderRaw = msg.key.participant || msg.key.remoteJid;
-      const sender = await sock.lid.resolve(senderRaw).catch(() => senderRaw) || senderRaw;
 
-      let groupMeta = null;
-      try {
-        groupMeta = await sock.groupMetadata(remoteJid);
-      } catch {}
-
-      const isSenderAdmin = groupMeta?.participants?.some(
-        (p) => (p.id === sender || p.id === senderRaw) && (p.admin === "admin" || p.admin === "superadmin")
-      ) ?? false;
-
-      const isBotAdmin = groupMeta?.participants?.some(
-        (p) => p.id === sock.user.id && (p.admin === "admin" || p.admin === "superadmin")
-      ) ?? false;
+      const [isSenderAdmin, isBotAdmin] = await Promise.all([
+        adminManager.isAdmin(sock, remoteJid, senderRaw),
+        adminManager.isBotAdmin(sock, remoteJid),
+      ]);
 
       const ctx = {
         sock,
         msg,
         remoteJid,
-        sender,
         senderRaw,
         args,
         isGroup,
         isSenderAdmin,
         isBotAdmin,
-        groupMeta,
-        reply: (text) =>
-          sock.sendMessage(remoteJid, { text }, { quoted: msg }),
+        reply: (text) => sock.sendMessage(remoteJid, { text }, { quoted: msg }),
       };
 
       for (const plugin of plugins) {
-        const match = plugin.command === command ||
+        const match =
+          plugin.command === command ||
           (Array.isArray(plugin.command) && plugin.command.includes(command));
 
         if (!match) continue;
