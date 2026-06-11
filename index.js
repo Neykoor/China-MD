@@ -10,8 +10,10 @@ import qrcode from "qrcode-terminal";
 import { loadPlugins } from "./src/loader.js";
 import { createHandler } from "./src/handler.js";
 import { registerWelcome } from "./src/welcome.js";
+import { adminManager } from "./src/adminManager.js";
 
 const logger = pino({ level: "silent" });
+let plugins = [];
 
 async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState("./auth");
@@ -27,7 +29,10 @@ async function startBot() {
 
   pluginLid(sock);
 
-  const plugins = await loadPlugins();
+  if (plugins.length === 0) {
+    plugins = await loadPlugins();
+  }
+
   const handler = createHandler(sock, plugins);
 
   registerWelcome(sock);
@@ -45,6 +50,7 @@ async function startBot() {
       const statusCode = lastDisconnect?.error?.output?.statusCode;
       const shouldReconnect = !UNAUTHORIZED_CODES.includes(statusCode);
       console.log(`[Bot] Conexión cerrada (${statusCode}). Reconectar: ${shouldReconnect}`);
+      adminManager.invalidateAll();
       if (shouldReconnect) startBot();
     }
 
