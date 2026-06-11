@@ -14,8 +14,7 @@ export function registerWelcome(sock) {
 
       if (typeof p === "string") {
         const resolved = await sock.lid.resolve(p).catch(() => null);
-        const jid = resolved || p;
-        numero = jid.split("@")[0];
+        numero = (resolved || p).split("@")[0];
       } else {
         const pn = p.phoneNumber || p.pn;
         if (pn && typeof pn === "string") {
@@ -31,11 +30,11 @@ export function registerWelcome(sock) {
 
       if (!numero) continue;
 
-      const texto =
-        `👋 Bienvenido/a al grupo *${groupMeta.subject}*\n` +
-        `📱 +${numero}`;
-
-      await sock.sendMessage(groupJid, { text: texto }).catch(() => {});
+      await sock
+        .sendMessage(groupJid, {
+          text: `👋 Bienvenido/a al grupo *${groupMeta.subject}*\n📱 +${numero}`,
+        })
+        .catch(() => {});
     }
   });
 }
