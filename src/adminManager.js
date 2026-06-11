@@ -3,8 +3,7 @@ import { jidNormalizedUser } from "@itsliaaa/baileys";
 
 const participantCache = new NodeCache({ stdTTL: 1800, checkperiod: 300, useClones: false });
 const botFacesCache    = new NodeCache({ stdTTL: 3600, useClones: false });
-
-const _fetchingGroups = new Map();
+const _fetchingGroups  = new Map();
 
 function toNumber(jid) {
   try {
