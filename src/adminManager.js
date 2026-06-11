@@ -7,19 +7,28 @@ const botFacesCache    = new NodeCache({ stdTTL: 3600, useClones: false });
 const _fetchingGroups = new Map();
 
 function toNumber(jid) {
-  return jidNormalizedUser(jid).split("@")[0];
+  try {
+    return jidNormalizedUser(jid).split("@")[0];
+  } catch {
+    return jid?.split("@")[0] ?? "";
+  }
 }
 
 function addBothForms(set, jid) {
-  if (!jid) return;
-  const normalized = jidNormalizedUser(jid);
-  set.add(normalized);
-  set.add(normalized.split("@")[0]);
+  if (!jid || typeof jid !== "string") return;
+  try {
+    const normalized = jidNormalizedUser(jid);
+    set.add(normalized);
+    set.add(normalized.split("@")[0]);
+  } catch {
+    set.add(jid);
+    set.add(jid.split("@")[0]);
+  }
 }
 
 async function fetchParticipants(sock, jid) {
-  let participants = participantCache.get(jid);
-  if (participants) return participants;
+  const cached = participantCache.get(jid);
+  if (cached) return cached;
 
   if (_fetchingGroups.has(jid)) return _fetchingGroups.get(jid);
 
