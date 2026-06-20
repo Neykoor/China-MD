@@ -1,0 +1,12 @@
+export default [
+  {
+    command: ["close", "cerrar"],
+    description: "Cierra el grupo (solo admins pueden enviar mensajes).",
+    adminOnly: true,
+    botAdmin: true,
+    async execute({ sock, remoteJid, reply }) {
+      await sock.groupSettingUpdate(remoteJid, "announcement");
+      await reply("🔒 Grupo cerrado. Solo admins pueden enviar mensajes.");
+    },
+  },
+];
